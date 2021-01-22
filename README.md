@@ -46,32 +46,27 @@ exp3_model_93：在**数据堂(Datatang)人脸106关键点数据集**上，训�
 
 ## 依赖项
 
-1. 请按照PyTorch官方说明安装pytorch 0.4.0
+1. 请按照官方说明安装docker
 
-2. 安装依赖项
-
-```
-pip install -r requirements.txt
-```
-
-3. 克隆项目
+2. 克隆项目
 
 ```
-git clone https://github.com/datatang-ailab/DT_Facial_106_Landmarks.git
+git clone https://github.com/datatang-ailab/Facial_106_Landmarks.git
 ```
 
-4. Disable cudnn for batch_norm: (See: @Microsoft / human-pose-estimation.pytorch#installation)
+3. 构建docker镜像
 
 ```
-# PYTORCH=/path/to/pytorch
-# for pytorch v0.4.0
-sed -i "1194s/torch\.backends\.cudnn\.enabled/False/g" ${PYTORCH}/torch/nn/functional.py
-# for pytorch v0.4.1
-sed -i "1254s/torch\.backends\.cudnn\.enabled/False/g" ${PYTORCH}/torch/nn/functional.py
+cd Facial_106_Landmarks/
+sudo docker build -f ./docker/Dockerfile -t wmm/fac106_ldmks:gpu-v0.1 ./docker/
 
-# Note that instructions like # PYTORCH=/path/to/pytorch indicate that you should pick 
-# a path where you'd like to have pytorch installed and then set an environment
-# variable (PYTORCH in this case) accordingly.
+```
+
+4. 启动训练环境
+
+```
+sudo docker run --name fac_106_ldmks --gpus 0  -it --rm -v $PWD/:/Facial_106_Landmarks/ wmm/fac106_ldmks:gpu-v0.1 bash
+
 ```
 
 ## 预训练模型
@@ -84,7 +79,10 @@ sed -i "1254s/torch\.backends\.cudnn\.enabled/False/g" ${PYTORCH}/torch/nn/funct
 ## 测试
 
 ```
+cd /Facial_106_Landmarks/
+
 python3 demo.py --indir ${img_directory} --outdir ${out_dir} --nClasses 106 --save_img
+
 # example:
 python3 demo.py --indir examples/imgs/ --outdir examples/outputs/ --nClasses 106 --save_img
 ```
@@ -92,7 +90,7 @@ python3 demo.py --indir examples/imgs/ --outdir examples/outputs/ --nClasses 106
 ## 训练
 
 ```
-cd train_sppe/src
+cd /Facial_106_Landmarks/train_sppe/src
 
 # Stage 1
 python train.py --dataset dt_fac_106_ldmks --expID stg_1 --nClasses 106 --LR 1e-4 --trainBatch 32 --validBatch 32 --nEpochs 1000000 --nThreads 30 --inputResH 256 --inputResW 256 --outputResH 64 --outputResW 64 --optMethod adam
